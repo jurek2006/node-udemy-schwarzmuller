@@ -1,15 +1,18 @@
 {
-    "name": "s04-improved-evelopment-workflow-and-debugging",
+    "name": "s05-working-with-expressjs",
     "version": "1.0.0",
     "description": "",
     "main": "app.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "nodemon app.js"
+        "start": "sudo fuser -k 3000/tcp && nodemon app.js"
     },
     "author": "",
     "license": "ISC",
     "devDependencies": {
         "nodemon": "^1.18.6"
+    },
+    "dependencies": {
+        "express": "^4.16.4"
     }
 }
