@@ -1,0 +1,11 @@
+extends layouts/main-layout.pug
+block content
+    main
+        if users.length > 0
+            h1 Użytkownicy
+            .grid
+                each user in users
+                    article.card.user-item
+                        h2.username #{user.username}
+        else
+            h1 Brak użytkowników
