@@ -8,6 +8,11 @@ const app = express();
 app.set("view engine", "ejs");
 app.set("views", "views");
 
+app.use((req, res, next) => {
+    app.locals.path = req.originalUrl;
+    next();
+});
+
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 
