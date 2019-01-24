@@ -8,15 +8,32 @@ const p = path.join(
     "cart.json"
 );
 
+const getDataFromFile = (filename, callback) => {
+    // gets data from JSON file (in data folder)
+    const filePath = path.join(
+        path.dirname(process.mainModule.filename),
+        "data",
+        filename
+    );
+    fs.readFile(filePath, (err, fileData) => {
+        if (!err) {
+            callback(JSON.parse(fileData), filePath);
+        } else {
+            callback(null, filePath);
+        }
+    });
+};
+
 module.exports = class Cart {
     static addProduct(id, productPrice) {
-        // Fetch the previous cart
-        fs.readFile(p, (err, fileContent) => {
+        getDataFromFile("cart.json", (fileData, filePath) => {
             let cart = { products: [], totalPrice: 0 };
-            if (!err) {
-                cart = JSON.parse(fileContent);
+            // Fetch the previous cart
+            if (fileData) {
+                cart = fileData;
             }
-            // Analyze the cart => Find existing product
+
+            //  Analyze the cart => Find existing product
             const existingProductIndex = cart.products.findIndex(
                 prod => prod.id === id
             );
