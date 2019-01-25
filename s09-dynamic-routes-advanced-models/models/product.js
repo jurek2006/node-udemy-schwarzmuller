@@ -1,19 +1,14 @@
 const fs = require("fs");
 const path = require("path");
 
-// path.resolve("views", "add-product.html");
-const p = path.join(
-    path.dirname(process.mainModule.filename),
-    "data",
-    "products.json"
-);
+const { getDataFromFile } = require("../utils/fileUtils");
 
 const getProductsFromFile = cb => {
-    fs.readFile(p, (err, fileContent) => {
-        if (err) {
+    getDataFromFile("products.json", (fileData, filePath) => {
+        if (!fileData) {
             return cb([]);
         }
-        cb(JSON.parse(fileContent));
+        cb(fileData, filePath);
     });
 };
 
@@ -27,9 +22,9 @@ module.exports = class Product {
 
     save() {
         this.id = Math.random().toString();
-        getProductsFromFile(products => {
+        getProductsFromFile((products, filePath) => {
             products.push(this);
-            fs.writeFile(p, JSON.stringify(products), err => {
+            fs.writeFile(filePath, JSON.stringify(products), err => {
                 console.log(err);
             });
         });

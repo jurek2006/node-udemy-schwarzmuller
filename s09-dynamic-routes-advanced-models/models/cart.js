@@ -1,28 +1,6 @@
 const fs = require("fs");
-const path = require("path");
 
-// path.resolve("views", "add-product.html");
-const p = path.join(
-    path.dirname(process.mainModule.filename),
-    "data",
-    "cart.json"
-);
-
-const getDataFromFile = (filename, callback) => {
-    // gets data from JSON file (in data folder)
-    const filePath = path.join(
-        path.dirname(process.mainModule.filename),
-        "data",
-        filename
-    );
-    fs.readFile(filePath, (err, fileData) => {
-        if (!err) {
-            callback(JSON.parse(fileData), filePath);
-        } else {
-            callback(null, filePath);
-        }
-    });
-};
+const { getDataFromFile } = require("../utils/fileUtils");
 
 module.exports = class Cart {
     static addProduct(id, productPrice) {
@@ -50,7 +28,7 @@ module.exports = class Cart {
                 cart.products = [...cart.products, updatedProduct];
             }
             cart.totalPrice += +productPrice;
-            fs.writeFile(p, JSON.stringify(cart), err => {
+            fs.writeFile(filePath, JSON.stringify(cart), err => {
                 console.log(err);
             });
         });
