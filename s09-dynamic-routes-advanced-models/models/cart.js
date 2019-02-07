@@ -1,21 +1,36 @@
 const fs = require("fs");
 const path = require("path");
 
-// path.resolve("views", "add-product.html");
-const p = path.join(
-    path.dirname(process.mainModule.filename),
-    "data",
-    "cart.json"
-);
+const fetchCart = callback => {
+    // creates path to cart.json storing cart
+    const p = path.join(
+        path.dirname(process.mainModule.filename),
+        "data",
+        "cart.json"
+    );
+
+    // fetches cart from file, if got error gives empty cart
+    fs.readFile(p, (err, fileContent) => {
+        let cart = { products: [], totalPrice: 0 };
+        if (!err) {
+            cart = JSON.parse(fileContent);
+        }
+        callback(cart, p);
+    });
+};
+
+const saveCart = (cart, p) => {
+    fs.writeFile(p, JSON.stringify(cart), err => {
+        if (err) {
+            console.log(err);
+        }
+    });
+};
 
 module.exports = class Cart {
     static addProduct(id, productPrice) {
         // Fetch the previous cart
-        fs.readFile(p, (err, fileContent) => {
-            let cart = { products: [], totalPrice: 0 };
-            if (!err) {
-                cart = JSON.parse(fileContent);
-            }
+        fetchCart((cart, p) => {
             // Analyze the cart => Find existing product
             const existingProductIndex = cart.products.findIndex(
                 prod => prod.id === id
@@ -33,18 +48,13 @@ module.exports = class Cart {
                 cart.products = [...cart.products, updatedProduct];
             }
             cart.totalPrice += +productPrice;
-            fs.writeFile(p, JSON.stringify(cart), err => {
-                console.log(err);
-            });
+            // Save cart to the cart file
+            saveCart(cart, p);
         });
     }
 
     static deleteProduct(id, productPrice) {
-        fs.readFile(p, (err, fileContent) => {
-            let cart = { products: [], totalPrice: 0 };
-            if (!err) {
-                cart = JSON.parse(fileContent);
-            }
+        fetchCart((cart, p) => {
             // delete product from cart if it's there
             const existingProduct = cart.products.find(prod => prod.id === id);
             if (existingProduct) {
@@ -61,9 +71,8 @@ module.exports = class Cart {
                     totalPrice: updatedTotalPrice
                 };
 
-                fs.writeFile(p, JSON.stringify(updatedCart), err => {
-                    console.log(err);
-                });
+                // Save cart to the cart file
+                saveCart(updatedCart, p);
             }
         });
     }
