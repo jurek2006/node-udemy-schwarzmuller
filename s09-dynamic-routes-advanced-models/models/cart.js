@@ -1,26 +1,36 @@
 const fs = require("fs");
 const path = require("path");
 
-const fetchCart = callback => {
-    // creates path to cart.json storing cart
-    const p = path.join(
+const getCartFilePath = () => {
+    // return path to file storing cart
+    return path.join(
         path.dirname(process.mainModule.filename),
         "data",
         "cart.json"
     );
+};
 
-    // fetches cart from file, if got error gives empty cart
-    fs.readFile(p, (err, fileContent) => {
-        let cart = { products: [], totalPrice: 0 };
-        if (!err) {
-            cart = JSON.parse(fileContent);
-        }
-        callback(cart, p);
+const fetchCart = () => {
+    return new Promise((resolve, reject) => {
+        // fetches cart from file, if got error gives empty cart
+        fs.readFile(getCartFilePath(), (err, fileContent) => {
+            let cart = { products: [], totalPrice: 0 };
+            if (!err) {
+                try {
+                    cart = JSON.parse(fileContent);
+                } catch (err) {
+                    console.log(
+                        `Can't properly parse ${getCartFilePath()} file. Empty cart resolved instead`
+                    );
+                }
+            }
+            resolve(cart);
+        });
     });
 };
 
-const saveCart = (cart, p) => {
-    fs.writeFile(p, JSON.stringify(cart), err => {
+const saveCart = cart => {
+    fs.writeFile(getCartFilePath(), JSON.stringify(cart), err => {
         if (err) {
             console.log(err);
         }
@@ -28,14 +38,17 @@ const saveCart = (cart, p) => {
 };
 
 module.exports = class Cart {
-    static addProduct(id, productPrice) {
-        // Fetch the previous cart
-        fetchCart((cart, p) => {
+    static async addProduct(id, productPrice) {
+        try {
+            // Fetch the previous cart
+            const cart = await fetchCart();
+
             // Analyze the cart => Find existing product
             const existingProductIndex = cart.products.findIndex(
                 prod => prod.id === id
             );
             const existingProduct = cart.products[existingProductIndex];
+
             // Add new product/ increase quantity
             let updatedProduct;
             if (existingProduct) {
@@ -48,13 +61,19 @@ module.exports = class Cart {
                 cart.products = [...cart.products, updatedProduct];
             }
             cart.totalPrice += +productPrice;
+
             // Save cart to the cart file
-            saveCart(cart, p);
-        });
+            await saveCart(cart);
+        } catch (err) {
+            console.log(err);
+        }
     }
 
-    static deleteProduct(id, productPrice) {
-        fetchCart((cart, p) => {
+    static async deleteProduct(id, productPrice) {
+        try {
+            // Fetch the previous cart
+            const cart = await fetchCart();
+
             // delete product from cart if it's there
             const existingProduct = cart.products.find(prod => prod.id === id);
             if (existingProduct) {
@@ -72,8 +91,10 @@ module.exports = class Cart {
                 };
 
                 // Save cart to the cart file
-                saveCart(updatedCart, p);
+                await saveCart(updatedCart);
             }
-        });
+        } catch (err) {
+            console.log(err);
+        }
     }
 };
