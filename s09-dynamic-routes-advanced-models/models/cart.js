@@ -77,17 +77,14 @@ module.exports = class Cart {
             // delete product from cart if it's there
             const existingProduct = cart.products.find(prod => prod.id === id);
             if (existingProduct) {
-                // subtract products' value from totalPrice
-                const updatedTotalPrice =
-                    cart.totalPrice - existingProduct.qty * productPrice;
-
                 // save products in cart without existingProduct
                 const updatedProducts = cart.products.filter(
                     prod => prod !== existingProduct
                 );
                 const updatedCart = {
                     products: updatedProducts,
-                    totalPrice: updatedTotalPrice
+                    totalPrice:
+                        cart.totalPrice - existingProduct.qty * productPrice
                 };
 
                 // Save cart to the cart file

@@ -26,7 +26,7 @@ module.exports = class Product {
         this.price = price;
     }
 
-    save() {
+    save(callback) {
         getProductsFromFile(products => {
             if (this.id) {
                 // update existing product
@@ -37,6 +37,7 @@ module.exports = class Product {
                     if (err) {
                         console.log(err);
                     }
+                    callback();
                 });
             } else {
                 // save new product
@@ -46,6 +47,7 @@ module.exports = class Product {
                     if (err) {
                         console.log(err);
                     }
+                    callback();
                 });
             }
         });
@@ -62,7 +64,7 @@ module.exports = class Product {
         });
     }
 
-    static deleteById(id) {
+    static deleteById(id, callback) {
         getProductsFromFile(products => {
             // get deleting product price because is needed to delete product from cart properly
             const productPrice = products.find(product => product.id === id)
@@ -73,6 +75,7 @@ module.exports = class Product {
             fs.writeFile(p, JSON.stringify(updatedProducts), err => {
                 if (!err) {
                     Cart.deleteProduct(id, productPrice);
+                    callback();
                 } else {
                     console.log(err);
                 }
