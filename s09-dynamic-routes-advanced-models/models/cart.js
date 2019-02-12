@@ -1,12 +1,12 @@
-const fs = require("fs");
-const path = require("path");
+const fs = require('fs');
+const path = require('path');
 
 const getCartFilePath = () => {
     // return path to file storing cart
     return path.join(
         path.dirname(process.mainModule.filename),
-        "data",
-        "cart.json"
+        'data',
+        'cart.json'
     );
 };
 
@@ -93,5 +93,16 @@ module.exports = class Cart {
         } catch (err) {
             console.log(err);
         }
+    }
+
+    static getCart(cb) {
+        fetchCart()
+            .then(cart => {
+                cb(cart);
+            })
+            .catch(err => {
+                console.log(err);
+                cb(null);
+            });
     }
 };
